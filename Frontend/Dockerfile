@@ -2,7 +2,7 @@ FROM maven:3.9.9-eclipse-temurin-21 as build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 mvn -q -DskipTests package
+RUN --mount=type=cache,target=/root/.m2 mvn -q -Dmaven.test.skip=true package
 
 FROM eclipse-temurin:21-jre
 ENV TZ=America/Santiago \
