@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./Backend
+    container_name: mfa-backend
+    ports: ["8081:8081"]
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://${RDS_ENDPOINT}:3306/${RDS_DB}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=America/Santiago&createDatabaseIfNotExist=true"
+      SPRING_DATASOURCE_USERNAME: "${RDS_USER}"
+      SPRING_DATASOURCE_PASSWORD: "${RDS_PASS}"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_JPA_SHOW_SQL: "false"
+      JWT_SECRET: "${JWT_SECRET}"
+      MFA_ISSUER: "BeatMap-MFA"
+      MFA_DIGITS: "6"
+      MFA_PERIOD: "30"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS}"
+    restart: unless-stopped
+    networks: [appnet]
+
+  frontend:
+    build: ./Frontend
+    container_name: mfa-frontend
+    ports: ["8081:8081"]
+    environment:
+      BACKEND_BASE_URL: "http://localhost:8081"
+      S3_WELCOME_IMAGE: "${S3_WELCOME_IMAGE}"
+    depends_on: [backend]
+    restart: unless-stopped
+    networks: [appnet]
+
+networks:
+  appnet:
+    driver: bridge
